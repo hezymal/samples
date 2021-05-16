@@ -11,9 +11,12 @@ class UserController extends BaseController {
         this.logOut = this.logOut.bind(this);
     }
 
-    logIn(user) {
-        this.storage.setItem(this.storageKey, user);
-        this.notify(this.logInEventKey, { user });
+    logIn({ userName, password }) {
+        this.storage.setItem(this.storageKey, { userName });
+
+        this.notify(this.logInEventKey);
+
+        return true;
     }
 
     logInFromStorage() {
@@ -22,16 +25,21 @@ class UserController extends BaseController {
             return;
         }
 
-        this.notify(this.logInEventKey, { user });
+        this.notify(this.logInEventKey);
     }
 
     logOut() {
         this.storage.removeItem(this.storageKey);
+
         this.notify(this.logOutEventKey);
     }
 
     get isAuth() {
         return !!this.storage.getItem(this.storageKey);
+    }
+
+    get user() {
+        return this.storage.getItem(this.storageKey);
     }
 
     get logInEventKey() {

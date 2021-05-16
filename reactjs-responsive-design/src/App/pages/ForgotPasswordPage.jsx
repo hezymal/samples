@@ -1,67 +1,62 @@
-import React, { useState } from 'react';
-import { useHistory } from 'react-router';
-import styled from 'styled-components';
-import Button from 'ui/Button';
-import Grid from 'ui/Grid';
-import Input from 'ui/Input';
-import { paddingSize } from 'ui/styles/sizes';
+import React, { useState } from "react";
+import { useHistory } from "react-router";
+import styled from "styled-components";
+import Form from "App/components/Form";
+import PageTitle from "App/components/PageTitle";
+import Button from "ui/components/Button";
+import Grid from "ui/components/Grid";
+import Input from "ui/components/Input";
 
 const Container = styled.div``;
 
-const FormTitle = styled.div`
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 1.5em;
-`;
+const isValidForm = (values) => {
+    if (!values.userName) {
+        return false;
+    }
 
-const Form = styled.form`
-    width: 50%;
-    margin: 20px auto;
-`;
-
-const Fields = styled.div``;
-
-const Field = styled.div`
-    margin-bottom: ${paddingSize}px;
-`;
+    return true;
+};
 
 const ForgotPasswordPage = () => {
     const history = useHistory();
     const [userName, setUserName] = useState();
-    
+
     const handleUserNameChange = (event) =>
         setUserName(event.currentTarget.value);
 
     const handleSendClick = (event) => {
         event.preventDefault();
-        history.push('/login');
+        history.push("/login");
     };
 
     const handleReturnClick = () => {
-        history.push('/login');
+        history.push("/login");
     };
 
     return (
         <Container>
             <Form>
-                <FormTitle>Forgit Password?</FormTitle>
-                <Fields>
-                    <Field>
-                        <Input
-                            placeholder='Username'
-                            value={userName}
-                            onChange={handleUserNameChange}
-                        />
-                    </Field>
-                </Fields>
+                <PageTitle>Forgot Password?</PageTitle>
+                <Form.Field>
+                    <Input
+                        placeholder="Username"
+                        value={userName}
+                        onChange={handleUserNameChange}
+                    />
+                </Form.Field>
                 <Grid.Row gutter={16} size={2}>
                     <Grid.Col>
-                        <Button type='submit' onClick={handleSendClick}>
+                        <Button
+                            type="submit"
+                            color="purple"
+                            disabled={!isValidForm({ userName })}
+                            onClick={handleSendClick}
+                        >
                             Send
                         </Button>
                     </Grid.Col>
                     <Grid.Col>
-                        <Button type='button' onClick={handleReturnClick}>
+                        <Button type="button" onClick={handleReturnClick}>
                             Return
                         </Button>
                     </Grid.Col>

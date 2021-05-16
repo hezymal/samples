@@ -1,37 +1,33 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import PageTitle from "App/components/PageTitle";
+import Form from "App/components/Form";
 import { userController } from "App/controllers";
-import Button from "ui/Button";
-import Grid from "ui/Grid";
-import Input from "ui/Input";
-import { paddingSize } from "ui/styles/sizes";
+import Button from "ui/components/Button";
+import Grid from "ui/components/Grid";
+import Input from "ui/components/Input";
 import { useHistory, useLocation } from "react-router";
 
 const Container = styled.div``;
 
-const FormTitle = styled.div`
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 1.5em;
-`;
+const isValidForm = (values) => {
+    if (!values.userName) {
+        return false;
+    }
 
-const Form = styled.form`
-    width: 50%;
-    margin: 20px auto;
-`;
+    if (!values.password) {
+        return false;
+    }
 
-const Fields = styled.div``;
-
-const Field = styled.div`
-    margin-bottom: ${paddingSize}px;
-`;
+    return true;
+};
 
 const LogInPage = () => {
     const history = useHistory();
     const location = useLocation();
 
-    const [userName, setUserName] = useState();
-    const [password, setPassword] = useState();
+    const [userName, setUserName] = useState("");
+    const [password, setPassword] = useState("");
 
     const handleUserNameChange = (event) =>
         setUserName(event.currentTarget.value);
@@ -41,7 +37,10 @@ const LogInPage = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        userController.logIn({ userName, password });
+
+        if (!userController.logIn({ userName, password })) {
+            return;
+        }
 
         if (location.pathname === "/login") {
             history.push("/");
@@ -55,27 +54,30 @@ const LogInPage = () => {
     return (
         <Container>
             <Form>
-                <FormTitle>Log In</FormTitle>
-                <Fields>
-                    <Field>
-                        <Input
-                            placeholder="Username"
-                            value={userName}
-                            onChange={handleUserNameChange}
-                        />
-                    </Field>
-                    <Field>
-                        <Input
-                            type="password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={handlePasswordChange}
-                        />
-                    </Field>
-                </Fields>
+                <PageTitle>Welcome!</PageTitle>
+                <Form.Field>
+                    <Input
+                        placeholder="Username"
+                        value={userName}
+                        onChange={handleUserNameChange}
+                    />
+                </Form.Field>
+                <Form.Field>
+                    <Input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={handlePasswordChange}
+                    />
+                </Form.Field>
                 <Grid.Row gutter={16} size={2}>
                     <Grid.Col>
-                        <Button type="submit" onClick={handleSubmit}>
+                        <Button
+                            type="submit"
+                            color="purple"
+                            disabled={!isValidForm({ userName, password })}
+                            onClick={handleSubmit}
+                        >
                             Log In
                         </Button>
                     </Grid.Col>

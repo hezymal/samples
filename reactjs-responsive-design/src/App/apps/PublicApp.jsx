@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import Logo from 'App/components/Logo';
 import LogInPage from 'App/pages/LogInPage';
 import ForgotPasswordPage from 'App/pages/ForgotPasswordPage';
-import Layout from 'ui/Layout';
+import Layout from 'ui/components/Layout';
 
 const Container = styled.div`
     background-color: #ffffff;
@@ -18,13 +18,13 @@ const Header = styled.div`
 const PublicApp = () => {
     return (
         <Container>
-            <Layout>
+            <Layout noLeft noRight>
                 <Layout.Top>
                     <Header>
                         <Logo />
                     </Header>
                 </Layout.Top>
-                <Layout.Middle full>
+                <Layout.Middle>
                     <Switch>
                         <Route path='/forgot-password'>
                             <ForgotPasswordPage />

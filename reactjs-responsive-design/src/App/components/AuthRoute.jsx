@@ -5,8 +5,8 @@ const AuthRoute = ({ render }) => {
     const [isAuth, setIsAuth] = useState();
 
     useEffect(() => {
-        userController.subscribe(userController.logInEventKey, ({ user }) => {
-            setIsAuth(!!user);
+        userController.subscribe(userController.logInEventKey, () => {
+            setIsAuth(true);
         });
 
         userController.subscribe(userController.logOutEventKey, () => {
