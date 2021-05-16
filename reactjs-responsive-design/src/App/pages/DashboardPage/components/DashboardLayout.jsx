@@ -1,16 +1,8 @@
-import React from 'react';
-import Layout from 'ui/components/Layout';
+import React from "react";
+import FlexibleLayout from "ui/components/FlexibleLayout";
 
-const DashboardLayout = ({ children }) => {
-    return (
-        <Layout noTop noLeft>
-            <Layout.Middle>
-                {children}
-            </Layout.Middle>
-            <Layout.Right>
-            </Layout.Right>
-        </Layout>
-    );
+const DashboardLayout = ({ children, right }) => {
+    return <FlexibleLayout children={children} right={right} />;
 };
 
 export default DashboardLayout;

@@ -1,12 +1,13 @@
-import React from "react";
+import React, { Fragment } from "react";
 import DashboardLayout from "./components/DashboardLayout";
 import TasksBoard from "./components/TasksBoard";
 
 const DashboardPage = () => {
     return (
-        <DashboardLayout>
-            <TasksBoard />
-        </DashboardLayout>
+        <DashboardLayout
+            children={<TasksBoard />}
+            right={<Fragment />}
+        />
     );
 };
 

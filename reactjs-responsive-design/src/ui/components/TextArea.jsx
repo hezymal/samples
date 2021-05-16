@@ -17,7 +17,7 @@ const Control = styled.textarea`
     background-color: ${grey1};
     outline: none;
     font: inherit;
-    overflow-y: visible;
+    overflow: hidden;
     resize: none;
 
     &:active,
@@ -28,14 +28,15 @@ const Control = styled.textarea`
 
 const TextArea = ({
     autoSize = true,
+    value,
     onEnter,
-    onInput,
     onKeyUp,
     onKeyDown,
+    onInput,
     ...tail
 }) => {
     const recalcHeight = (element) => {
-        element.style.height = 0;
+        element.style.height = "0px";
         element.style.height = element.scrollHeight + "px";
     };
 
@@ -48,26 +49,31 @@ const TextArea = ({
     };
 
     const handleKeyUp = (event) => {
-        onKeyUp && onKeyUp(event);
-
         if (autoSize) {
             recalcHeight(event.currentTarget);
         }
+
+        onKeyUp && onKeyUp(event);
     };
 
     const handleKeyDown = (event) => {
-        if (onEnter) {
-            if (event.keyCode === 13 || event.keyCode === 10) {
-                onEnter(event);
+        if (event.keyCode === 13 || event.keyCode === 10) {
+            if (autoSize) {
+                recalcHeight(event.currentTarget);
             }
+
+            onEnter && onEnter(event);
         }
+
+        onKeyDown && onKeyDown(event);
     };
 
     return (
         <Control
-            onInput={handleInput}
+            value={value}
             onKeyUp={handleKeyUp}
             onKeyDown={handleKeyDown}
+            onInput={handleInput}
             {...tail}
         />
     );

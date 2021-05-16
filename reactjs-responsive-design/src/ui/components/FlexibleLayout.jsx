@@ -1,43 +1,22 @@
-import React, { useState } from "react";
-import styled, { css } from "styled-components";
-import useBodyEventListener from "ui/hooks/useBodyEventListener";
+import React, { Component, createRef } from "react";
+import styled from "styled-components";
 import { grey4, purple1 } from "ui/styles/colors";
 import { paddingSize } from "ui/styles/sizes";
 
-const FlexibleLayoutBlock = styled.div`
+const Block = styled.div`
     display: grid;
     grid-template-rows: auto;
     height: 100%;
-
-    ${(props) => css`
-        grid-template-columns: ${props.leftDividerWidth}px auto ${props.rightDividerWidth}px;
-    `}
 `;
 
-const FlexibleLayoutLeft = styled.div`
+const LeftContent = styled.div`
     grid-column: 1;
     grid-row: 1;
     padding: ${paddingSize}px;
     overflow: auto;
 `;
 
-const FlexibleLayoutMiddle = styled.div`
-    position: relative;
-    grid-column: 2;
-    grid-row: 1;
-    padding: ${paddingSize}px;
-    border-left: 1px solid ${grey4};
-    border-right: 1px solid ${grey4};
-`;
-
-const FlexibleLayoutRight = styled.div`
-    grid-column: 3;
-    grid-row: 1;
-    padding: ${paddingSize}px;
-    overflow: auto;
-`;
-
-const FlexibleLayoutLeftDivider = styled.div`
+const LeftDivider = styled.div`
     position: absolute;
     top: 0;
     left: -3px;
@@ -47,13 +26,29 @@ const FlexibleLayoutLeftDivider = styled.div`
     background-color: ${purple1};
     opacity: 0;
     transition: 0.5s opacity;
+    user-select: none;
 
     &:hover {
         opacity: 1;
     }
 `;
 
-const FlexibleLayoutRightDivider = styled.div`
+const MiddleContent = styled.div`
+    position: relative;
+    grid-row: 1;
+    padding: ${paddingSize}px;
+    border-left: 1px solid ${grey4};
+    border-right: 1px solid ${grey4};
+`;
+
+const RightContent = styled.div`
+    grid-column: 3;
+    grid-row: 1;
+    padding: ${paddingSize}px;
+    overflow: auto;
+`;
+
+const RightDivider = styled.div`
     position: absolute;
     top: 0;
     right: -3px;
@@ -63,102 +58,186 @@ const FlexibleLayoutRightDivider = styled.div`
     background-color: ${purple1};
     opacity: 0;
     transition: 0.5s opacity;
+    user-select: none;
 
     &:hover {
         opacity: 1;
     }
 `;
 
-const FlexibleLayout = ({ children, left, right, ...tail }) => {
-    const [rightDividerX, setRightDividerX] = useState(null);
-    const [rightDividerWidth, setRightDividerWidth] = useState(200);
-    const [actualRightDividerWidth, setActualRightDividerWidth] = useState(200);
+const DIVIDER_MIN_WIDTH = 20;
+const DEFAULT_DIVIDER_WIDTH = 200;
 
-    const [leftDividerX, setLeftDividerX] = useState(null);
-    const [leftDividerWidth, setLeftDividerWidth] = useState(200);
-    const [actualLeftDividerWidth, setActualLeftDividerWidth] = useState(200);
+class FlexibleLayout extends Component {
+    constructor(props) {
+        super(props);
 
-    const handleRightDividerMouseDown = (event) => {
-        console.log(event.pageX);
-        setRightDividerX(event.pageX);
-    };
+        this.blockRef = createRef();
+        this.middleContentRef = createRef();
 
-    const handleLeftDividerMouseDown = (event) => {
-        console.log(event.pageX);
-        setLeftDividerX(event.pageX);
-    };
+        this.leftDividerX = null;
+        this.leftDividerWidth = props.leftDividerWidth ?? DEFAULT_DIVIDER_WIDTH;
+        this.actualLeftDividerWidth = this.leftDividerWidth;
+        this.handleLeftDividerMouseDown =
+            this.handleLeftDividerMouseDown.bind(this);
 
-    useBodyEventListener(
-        "mousemove",
-        (event) => {
-            if (rightDividerX !== null) {
-                console.log(event.pageX);
-                setActualRightDividerWidth(
-                    rightDividerWidth - (event.pageX - rightDividerX)
-                );
-            }
-        },
-        [rightDividerX, rightDividerWidth, setActualRightDividerWidth]
-    );
+        this.rightDividerX = null;
+        this.rightDividerWidth =
+            props.rightDividerWidth ?? DEFAULT_DIVIDER_WIDTH;
+        this.actualRightDividerWidth = this.rightDividerWidth;
+        this.handleRightDividerMouseDown =
+            this.handleRightDividerMouseDown.bind(this);
 
-    useBodyEventListener(
-        "mousemove",
-        (event) => {
-            if (leftDividerX !== null) {
-                console.log(event.pageX);
-                setActualLeftDividerWidth(
-                    leftDividerWidth + (event.pageX - leftDividerX)
-                );
-            }
-        },
-        [leftDividerX, leftDividerWidth, setActualLeftDividerWidth]
-    );
+        this.refreshBlockWidth = this.setContentsSizes.bind(this);
+        this.calculateDividerWidth = this.calculateDividerWidth.bind(this);
+        this.handleDocumentMouseMove = this.handleDocumentMouseMove.bind(this);
+        this.handleDocumentMouseUp = this.handleDocumentMouseUp.bind(this);
+    }
 
-    useBodyEventListener(
-        "mouseup",
-        (event) => {
-            if (rightDividerX !== null) {
-                console.log(event.pageX);
-                setRightDividerWidth(actualRightDividerWidth);
-                setRightDividerX(null);
-            }
-        },
-        [rightDividerX, actualRightDividerWidth, setRightDividerX, setRightDividerWidth]
-    );
+    setContentsSizes(leftDividerWidth, rightDividerWidth) {
+        if (!this.blockRef.current || !this.middleContentRef.current) {
+            return;
+        }
 
-    useBodyEventListener(
-        "mouseup",
-        (event) => {
-            if (leftDividerX !== null) {
-                console.log(event.pageX);
-                setLeftDividerWidth(actualLeftDividerWidth);
-                setLeftDividerX(null);
-            }
-        },
-        [leftDividerX, actualLeftDividerWidth, setLeftDividerX, setLeftDividerWidth]
-    );
+        let blockColumns = "auto";
+        let middleContentColumn = "1 / 3";
 
-    console.log(rightDividerWidth);
-    console.log(leftDividerWidth);
+        if (this.props.left) {
+            blockColumns = `${leftDividerWidth}px ${blockColumns}`;
+            middleContentColumn = "2 / 3";
+        }
 
-    return (
-        <FlexibleLayoutBlock
-            leftDividerWidth={actualLeftDividerWidth}
-            rightDividerWidth={actualRightDividerWidth}
-        >
-            <FlexibleLayoutLeft>{left}</FlexibleLayoutLeft>
-            <FlexibleLayoutMiddle>
-                <FlexibleLayoutLeftDivider
-                    onMouseDown={handleLeftDividerMouseDown}
-                />
-                {children}
-                <FlexibleLayoutRightDivider
-                    onMouseDown={handleRightDividerMouseDown}
-                />
-            </FlexibleLayoutMiddle>
-            <FlexibleLayoutRight>{right}</FlexibleLayoutRight>
-        </FlexibleLayoutBlock>
-    );
-};
+        if (this.props.right) {
+            blockColumns = `${blockColumns} ${rightDividerWidth}px`;
+            middleContentColumn = "1 / 2";
+        }
+
+        if (this.props.left && this.props.right) {
+            middleContentColumn = "2";
+        }
+
+        this.blockRef.current.style.gridTemplateColumns = blockColumns;
+        this.middleContentRef.current.style.gridColumn = middleContentColumn;
+    }
+
+    calculateDividerWidth(mouseX, dividerX, dividerWidth, direction = -1) {
+        const result = dividerWidth + (mouseX - dividerX) * direction;
+        return result < DIVIDER_MIN_WIDTH ? DIVIDER_MIN_WIDTH : result;
+    }
+
+    handleLeftDividerMouseDown(event) {
+        this.leftDividerWidth = this.actualLeftDividerWidth;
+        this.leftDividerX = event.pageX;
+    }
+
+    handleRightDividerMouseDown(event) {
+        this.rightDividerWidth = this.actualRightDividerWidth;
+        this.rightDividerX = event.pageX;
+    }
+
+    handleDocumentMouseMove(event) {
+        let wasChanged = false;
+
+        if (this.rightDividerX !== null) {
+            this.actualRightDividerWidth = this.calculateDividerWidth(
+                event.pageX,
+                this.rightDividerX,
+                this.rightDividerWidth
+            );
+            wasChanged = true;
+        }
+
+        if (this.leftDividerX !== null) {
+            this.actualLeftDividerWidth = this.calculateDividerWidth(
+                event.pageX,
+                this.leftDividerX,
+                this.leftDividerWidth,
+                +1
+            );
+            wasChanged = true;
+        }
+
+        if (wasChanged) {
+            this.setContentsSizes(
+                this.actualLeftDividerWidth,
+                this.actualRightDividerWidth
+            );
+        }
+    }
+
+    handleDocumentMouseUp(event) {
+        let wasChanged = false;
+
+        if (this.rightDividerX !== null) {
+            this.actualRightDividerWidth = this.calculateDividerWidth(
+                event.pageX,
+                this.rightDividerX,
+                this.rightDividerWidth
+            );
+            this.rightDividerWidth = this.actualRightDividerWidth;
+            this.rightDividerX = null;
+
+            wasChanged = true;
+        }
+
+        if (this.leftDividerX !== null) {
+            this.actualLeftDividerWidth = this.calculateDividerWidth(
+                event.pageX,
+                this.leftDividerX,
+                this.leftDividerWidth,
+                +1
+            );
+            this.leftDividerWidth = this.actualLeftDividerWidth;
+            this.leftDividerX = null;
+
+            wasChanged = true;
+        }
+
+        if (wasChanged) {
+            this.setContentsSizes(
+                this.actualLeftDividerWidth,
+                this.actualRightDividerWidth
+            );
+        }
+    }
+
+    render() {
+        const { left, children, right } = this.props;
+
+        return (
+            <Block ref={this.blockRef}>
+                {left && <LeftContent>{left}</LeftContent>}
+                <MiddleContent ref={this.middleContentRef}>
+                    {left && (
+                        <LeftDivider
+                            onMouseDown={this.handleLeftDividerMouseDown}
+                        />
+                    )}
+                    {children}
+                    {right && (
+                        <RightDivider
+                            onMouseDown={this.handleRightDividerMouseDown}
+                        />
+                    )}
+                </MiddleContent>
+                {right && <RightContent>{right}</RightContent>}
+            </Block>
+        );
+    }
+
+    componentDidMount() {
+        document.addEventListener("mousemove", this.handleDocumentMouseMove);
+        document.addEventListener("mouseup", this.handleDocumentMouseUp);
+        this.setContentsSizes(
+            this.actualLeftDividerWidth,
+            this.actualRightDividerWidth
+        );
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener("mousemove", this.handleDocumentMouseMove);
+        document.removeEventListener("mouseup", this.handleDocumentMouseUp);
+    }
+}
 
 export default FlexibleLayout;

@@ -16,6 +16,7 @@ const Container = styled.div`
 `;
 
 const Content = styled.div`
+    display: inline-block;
     border-radius: ${borderRadius}px;
     padding: ${paddingSize}px;
 
@@ -24,7 +25,6 @@ const Content = styled.div`
     `}
 
     ${props => props.direction === 'outcoming' && css`
-        text-align: right;
         background-color: ${grey2};
     `}
 `;
