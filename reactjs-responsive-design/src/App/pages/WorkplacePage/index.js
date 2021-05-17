@@ -1,1 +1,1 @@
-export { default } from './WorkplacePage';
+export { default } from "./WorkplacePage";

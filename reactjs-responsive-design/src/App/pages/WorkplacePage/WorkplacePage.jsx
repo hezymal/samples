@@ -1,48 +1,41 @@
 import React, { Fragment } from "react";
+import { loadQuery, usePreloadedQuery } from "react-relay/hooks";
+import graphql from "babel-plugin-relay/macro";
 import Chat from "./components/Chat";
 import Tasks from "./components/Tasks";
 import WorkplaceLayout from "./components/WorkplaceLayout";
+import relayEnvironment from "App/relayEnvironment";
+
+const workplacePageQuery = graphql`
+    query WorkplacePageQuery {
+        tasks {
+            _id
+            name
+        }
+    }
+`;
+
+const preloadedQuery = loadQuery(relayEnvironment, workplacePageQuery, {});
 
 const WorkplacePage = () => {
-    const tasks = {
-        task1: {
-            to: "/workplace/task1",
-            title: "Task 1",
-            children: {},
-        },
-        task2: {
-            to: "/workplace/task2",
-            title: "Task 2",
-            children: {},
-        },
-        task3: {
-            to: "/workplace/task3",
-            title: "Task 3",
-            children: {},
-        },
-        task4: {
-            to: "/workplace/task4",
-            title: "Task 4",
-            children: {},
-        },
-        task5: {
-            to: "/workplace/task5",
-            title: "Task 5",
-            children: {
-                subtask1: {
-                    to: "/workplace/task5/subtask1",
-                    title: "SubTask 1",
-                    children: {
-                        subtask1: {
-                            to: "/workplace/task5/subtask1/subtask1",
-                            title: "SubTask 1",
-                            children: {},
-                        },
-                    },
-                },
+    let { tasks } = usePreloadedQuery(workplacePageQuery, preloadedQuery);
+
+    tasks = tasks.map(task => ({
+        to: `/workplace/${task._id}`,
+        title: task.name,
+        children: {
+            [task._id]: {
+                to: `/workplace/${task._id}`,
+                title: task.name,
+                children: {},
+            },
+            [task._id + '2']: {
+                to: `/workplace/${task._id}`,
+                title: task.name,
+                children: {},
             },
         },
-    };
+    }));
 
     return (
         <WorkplaceLayout

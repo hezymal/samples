@@ -15,7 +15,7 @@ const Header = styled.div`
     text-align: center;
 `;
 
-const PublicApp = () => {
+const PublicSegment = () => {
     return (
         <Container>
             <Layout noLeft noRight>
@@ -39,4 +39,4 @@ const PublicApp = () => {
     );
 };
 
-export default PublicApp;
+export default PublicSegment;

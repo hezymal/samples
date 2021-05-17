@@ -1,33 +1,28 @@
-const getUserById = async (request, id) => {
-    const db = request.app.get("db");
-    const user = await db.collection("users")
-        .findOne({ _id: id });
+const USERS_COLLECTION_NAME = "users";
 
-    return {
-        id: user._id,
-        name: user.name,
-    };
+const getUserById = async (request, _id) => {
+    const db = request.app.get("db");
+    return await db.collection(USERS_COLLECTION_NAME)
+        .findOne({ _id });
 };
 
-const createUser = async (request, id, name) => {
+const createUser = async (request, newUser) => {
     const db = request.app.get("db");
-    const result = await db.collection("users")
-        .insertOne({ _id: id, name });
+    const result = await db.collection(USERS_COLLECTION_NAME)
+        .insertOne(newUser);
 
     return result.insertedId;
 };
 
 const resolvers = {
     Query: {
-        user: (_, args, request) => {
-            return getUserById(request, args.id);
-        }
+        user: (_, args, request) => getUserById(request, args._id),
     },
 
     Mutation: {
         createUser: async (_, args, request) => {
-            const id = await createUser(request, args.id, args.name);
-            return await getUserById(request, id);
+            const _id = await createUser(request, args);
+            return await getUserById(request, _id);
         },
     },
 };

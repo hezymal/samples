@@ -16,7 +16,7 @@ const Container = styled.div`
     height: 100%;
 `;
 
-const PrivateApp = () => {
+const PrivateSegment = () => {
     const user = userController.user;
 
     return (
@@ -52,4 +52,4 @@ const PrivateApp = () => {
     );
 };
 
-export default PrivateApp;
+export default PrivateSegment;

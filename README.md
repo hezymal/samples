@@ -9,6 +9,7 @@
 
 2. (WIP) [reactjs-responsive-design](./reactjs-responsive-design)
    - Приложение на ReactJS
+   - Relay для общения с сервером
    - Responsive дизайн
    - Сложные компоненты
      - Layout, с возможностью изменения размеров
